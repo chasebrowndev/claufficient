@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(fd *)",
+      "Bash(ls *)",
+      "Bash(bat *)",
+      "Bash(eza *)",
+      "Bash(git *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(file *)",
+      "Bash(jq *)",
+      "Bash(fzf *)",
+      "Bash(zoxide *)",
+      "Bash(delta *)",
+      "Bash(stow *)",
+      "Bash(ln -sf /home/chase/.config/themes/cyberpunk/hypr.conf /home/chase/.config/hypr/theme.conf)",
+      "Bash(git clone *)",
+      "Skill(update-config)",
+      "Bash(pacman -Q)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath' | { read -r f; [[ $f == */hypr/* ]] && { echo 'Reloading Hyprland...'; hyprctl reload 2>/dev/null || true; }; [[ $f == */.config/* ]] && { cd ~ && git -C ~/dotfiles add -A && git -C ~/dotfiles commit -m 'Auto-sync: config changes' 2>/dev/null || true; }; }",
+            "timeout": 5,
+            "statusMessage": "Syncing changes..."
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "editorMode": "normal",
+  "terminalProgressBarEnabled": true,
+  "remoteControlAtStartup": false,
+  "inputNeededNotifEnabled": false,
+  "agentPushNotifEnabled": true,
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 200000,
+  "cleanupPeriodDays": 30,
+  "enabledPlugins": {
+    "code-reviewer@claude-code-marketplace": true
+  }
+}

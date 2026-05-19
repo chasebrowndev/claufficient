@@ -111,6 +111,9 @@ cat > "$HOME/.claude/settings.json" << EOF
       "Bash(stow *)",
       "Bash(git clone *)",
       "Bash(pacman -Q)",
+      "Bash(gh *)",
+      "Bash(sudo pacman *)",
+      "Bash(kitty *)",
       "Skill(update-config)"
     ],
     "defaultMode": "acceptEdits"
@@ -182,8 +185,45 @@ add_if_missing 'alias diff="delta"'
 add_if_missing 'eval "$(zoxide init zsh)"'
 add_if_missing 'alias cd=z'
 add_if_missing 'alias cdi=zi'
+add_if_missing 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"'
+
+# sudo-term helper — opens interactive sudo in a new kitty window
+if ! grep -qF 'sudo-term()' "$ZSHRC" 2>/dev/null; then
+    cat >> "$ZSHRC" << 'SUDOTERM'
+
+# ── sudo-term: run interactive sudo in a new kitty window ─────────────────────
+sudo-term() {
+    kitty bash -c "sudo $*; echo; read -p 'Done — press enter to close' _" &
+}
+SUDOTERM
+fi
 
 success "Zsh configured"
+
+# ── npm global prefix (user-writable, enables Claude Code auto-updates) ─────────
+info "Configuring npm global prefix..."
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global" 2>/dev/null && success "npm prefix set to ~/.npm-global" || info "npm not found — skipping"
+
+# ── Sudoers: NOPASSWD for pacman + long sudo timeout ─────────────────────────────
+info "Configuring sudoers for Claude Code..."
+SUDOERS_FILE="/tmp/claufficient-sudoers"
+cat > "$SUDOERS_FILE" << SUDOEOF
+Defaults timestamp_timeout=120
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/pacman -S *
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/pacman -Syu *
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/pacman -R *
+SUDOEOF
+
+if visudo -cf "$SUDOERS_FILE" &>/dev/null; then
+    sudo cp "$SUDOERS_FILE" /etc/sudoers.d/claufficient
+    sudo chmod 440 /etc/sudoers.d/claufficient
+    rm "$SUDOERS_FILE"
+    success "Sudoers configured (NOPASSWD: pacman, 2h timeout)"
+else
+    rm "$SUDOERS_FILE"
+    info "sudoers validation failed — skipping (install manually)"
+fi
 
 # ── Create HANDOFF.md ────────────────────────────────────────────────────────────
 cat > "$HOME/HANDOFF.md" << EOF

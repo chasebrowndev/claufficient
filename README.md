@@ -12,6 +12,8 @@ One script installs and configures everything needed to work efficiently with Cl
 - **Memory System** — pre-loaded context: tools, patterns, decision rules, best practices
 - **Zsh Aliases** — eza, bat, delta, zoxide wired in automatically
 - **CLAUDE.md** — rich instructions so Claude understands your environment from session one
+- **Interactive Sudo** — `sudo-term()` helper + NOPASSWD sudoers rules so Claude can run package installs without interrupting flow
+- **npm Global Prefix** — relocates npm global to `~/.npm-global` so Claude Code can auto-update without root
 
 ## Install
 
@@ -59,6 +61,12 @@ The script prompts for your GitHub username, email, and dotfiles path — then h
 
 **`~/.zshrc` additions**
 - eza, bat, delta, zoxide aliases appended (safe, no overwrites)
+- `sudo-term()` function — spawns interactive sudo in a new kitty window
+- `~/.npm-global/bin` added to PATH
+
+**`/etc/sudoers.d/claufficient`**
+- `timestamp_timeout=120` — 2-hour sudo grace period
+- NOPASSWD for `pacman -S`, `pacman -Syu`, `pacman -R`
 
 ## After install
 

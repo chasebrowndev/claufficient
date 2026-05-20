@@ -14,6 +14,8 @@ One script installs and configures everything needed to work efficiently with Cl
 - **CLAUDE.md** — rich instructions so Claude understands your environment from session one
 - **Interactive Sudo** — `sudo-term()` helper + NOPASSWD sudoers rules so Claude can run package installs without interrupting flow
 - **npm Global Prefix** — relocates npm global to `~/.npm-global` so Claude Code can auto-update without root
+- **Company Announcements** — session-start status messages styled in Anthropic orange
+- **Waybar Module** — live Claude usage widget showing 5-hour session and 7-day limits (requires waybar)
 
 ## Install
 
@@ -67,6 +69,18 @@ The script prompts for your GitHub username, email, and dotfiles path — then h
 **`/etc/sudoers.d/claufficient`**
 - `timestamp_timeout=120` — 2-hour sudo grace period
 - NOPASSWD for `pacman -S`, `pacman -Syu`, `pacman -R`
+
+**Company announcements** (`companyAnnouncements` in settings.json)
+- 30 Anthropic-orange status lines shown at session start
+- Arch/Hyprland/cyberpunk flavored
+
+**Waybar module** (`waybar/claude_usage.py`)
+- Live usage bars for 5-hour session and 7-day limits
+- Extra usage credit display when enabled
+- Reads OAuth token from `~/.claude/.credentials.json`
+- 5-minute cache to avoid hammering the API
+- Auto-installed to `~/.config/waybar/scripts/` if waybar is detected
+- Add `custom/claude` to your waybar modules — see `waybar/waybar-module.jsonc`
 
 ## After install
 

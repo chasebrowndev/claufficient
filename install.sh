@@ -133,6 +133,38 @@ cat > "$HOME/.claude/settings.json" << EOF
       }
     ]
   },
+  "companyAnnouncements": [
+    "\u001b[38;5;208mClaude:\u001b[0m all systems nominal",
+    "\u001b[38;5;208mClaude:\u001b[0m wayland compositor: stable — don't touch it",
+    "\u001b[38;5;208mClaude:\u001b[0m uptime: suspiciously high",
+    "\u001b[38;5;208mClaude:\u001b[0m kernel: happy, let's keep it that way",
+    "\u001b[38;5;208mClaude:\u001b[0m disk space: reclaimed",
+    "\u001b[38;5;208mClaude:\u001b[0m cache cleared, soul refreshed",
+    "\u001b[38;5;208mClaude:\u001b[0m status: clean (for now)",
+    "\u001b[38;5;208mClaude:\u001b[0m the dots are filed and committed",
+    "\u001b[38;5;208mClaude:\u001b[0m merge conflicts are just opportunities",
+    "\u001b[38;5;208mClaude:\u001b[0m no deprecated APIs were harmed",
+    "\u001b[38;5;208mClaude:\u001b[0m venv: activated",
+    "\u001b[38;5;208mClaude:\u001b[0m ksudo: locked and loaded",
+    "\u001b[38;5;208mClaude:\u001b[0m zsh fast — you're faster",
+    "\u001b[38;5;208mClaude:\u001b[0m bin/ scripts are underrated",
+    "\u001b[38;5;208mClaude:\u001b[0m btw, we know",
+    "\u001b[38;5;208mClaude:\u001b[0m pacman -Syu'd and ready",
+    "\u001b[38;5;208mClaude:\u001b[0m kernel panic? not today",
+    "\u001b[38;5;208mClaude:\u001b[0m compositor says hello",
+    "\u001b[38;5;208mClaude:\u001b[0m cyberpunk theme: correct call",
+    "\u001b[38;5;208mClaude:\u001b[0m your terminal is gorgeous",
+    "\u001b[38;5;208mClaude:\u001b[0m zero segfaults (so far)",
+    "\u001b[38;5;208mClaude:\u001b[0m skill issue detected: none",
+    "\u001b[38;5;208mClaude:\u001b[0m it works on my machine",
+    "\u001b[38;5;208mClaude:\u001b[0m less thinking, more shipping",
+    "\u001b[38;5;208mClaude:\u001b[0m undefined behavior? undefined opportunity",
+    "\u001b[38;5;208mClaude:\u001b[0m chaos mode: off (adjustable)",
+    "\u001b[38;5;208mClaude:\u001b[0m erebus is watching",
+    "\u001b[38;5;208mClaude:\u001b[0m blackbird has entered the chat",
+    "\u001b[38;5;208mClaude:\u001b[0m the Yggdrasil holds",
+    "\u001b[38;5;208mClaude:\u001b[0m orange is not a color — it's a lifestyle"
+  ],
   "autoCompactEnabled": true,
   "autoCompactWindow": 200000,
   "cleanupPeriodDays": 30,
@@ -204,6 +236,19 @@ success "Zsh configured"
 info "Configuring npm global prefix..."
 mkdir -p "$HOME/.npm-global"
 npm config set prefix "$HOME/.npm-global" 2>/dev/null && success "npm prefix set to ~/.npm-global" || info "npm not found — skipping"
+
+# ── Waybar claude usage module (optional) ───────────────────────────────────────
+if command -v waybar &>/dev/null; then
+    info "Installing waybar claude usage module..."
+    mkdir -p "$HOME/.config/waybar/scripts"
+    cp "$(dirname "$0")/waybar/claude_usage.py" "$HOME/.config/waybar/scripts/claude_usage.py"
+    chmod +x "$HOME/.config/waybar/scripts/claude_usage.py"
+    success "claude_usage.py installed — add custom/claude module to your waybar config"
+    info "See waybar/waybar-module.jsonc for the module config snippet"
+else
+    info "waybar not found — skipping waybar module (copy waybar/ manually if needed)"
+fi
+echo
 
 # ── Sudoers: NOPASSWD for pacman + long sudo timeout ─────────────────────────────
 info "Configuring sudoers for Claude Code..."

@@ -1,0 +1,10 @@
+// Add this to your waybar config.jsonc under the appropriate modules key
+// Example: "modules-center": ["custom/claude"]
+
+"custom/claude": {
+  "exec": "python3 ~/.config/waybar/scripts/claude_usage.py",
+  "return-type": "json",
+  "format": "{}",
+  "interval": 60,
+  "tooltip": false
+}

@@ -1,62 +1,39 @@
-# Claude Code Assistant
+<!-- #CLAUFFICIENT V1 — managed by claufficient. Personal notes go ABOVE this marker. -->
 
-You are a coding assistant running inside Claude Code on Arch Linux.
+# Environment
 
-## Your Capabilities
-- Create, read, edit, and delete files using your tools
-- Run bash commands
-- Debug and explain code
-- Help with any programming task
+- Home: /home/chase   Shell: zsh on Arch   Editor: micro
+- Git: chasebrowndev / chase.brown.dev
+- Dotfiles: ~/dotfiles (mirror of ~/.config; auto-commit hook syncs `*/.config/*` edits)
+- Hyprland: `~/.config/hypr/hyprland.conf` sources `theme.conf`; reload with `hyprctl reload`
+- Terminal: kitty   WM: Hyprland   npm prefix: ~/.npm-global
 
-## System Context
-- **Home directory**: /home/chase
-- **Email**: brown10.chase@gmail.com
-- **OS**: Arch Linux
-- **Shell**: zsh
-- **Date (context established)**: 2026-05-19
+# Decision rules
 
-## Filesystem Structure
-- **Dotfiles**: `~/dotfiles/` (GitHub: chasebrowndev/dotfiles)
-  - Contains: `.config/hypr/`, `.config/kitty/`
-  - Keep in sync with `~/.config/` changes
-- **Hyprland config**: `~/.config/hypr/`
-  - `hyprland.conf` → sources `hypr.conf`
-  - `hypr.conf` → symlink to active theme
-- **Themes**: `~/.config/themes/cyberpunk/` (active), others available
-- **Terminal**: `~/.config/kitty/kitty.conf`
-- **Shell**: `~/.zshrc`
-- **Scripts**: `~/scripts/aliases.sh`, `~/bin/scd.py`
+- Direct edits, no scaffolding. Existing files first.
+- One solution path — pick the simplest of N working approaches.
+- Don't refactor unless asked. Three similar lines is fine.
+- Short responses. No trailing summaries; the diff speaks.
+- Sharp aesthetic: cyberpunk red/black, hard edges, minimal.
 
-## Common Operations
-1. **Update Hyprland theme** — Edit config files, then `hyprctl reload`
-2. **Update Kitty/Zsh** — Edit config, reload terminal/shell
-3. **Sync dotfiles** — Copy changes from `~/.config/` to `~/dotfiles/` repo
-4. **Explore codebase** — Use `rg`, `fd`, `bat` before diving into specific files
-5. **Review git history** — `git log --oneline` for quick overview before detailed exploration
+# Tool preferences (terse-first)
 
-## Decision Rules
-- **Minimal over elaborate** — Prefer direct edits to frameworks, avoid scaffolding
-- **Existing files first** — Edit existing configs rather than creating new ones
-- **Sharp over soft** — Cyberpunk aesthetic: hard edges, minimal blur, clean lines
-- **Speed over completeness** — Direct execution over extensive planning
-- **One solution path** — When multiple approaches work, pick the simplest
-- **No premature abstractions** — Don't refactor unless specifically asked
+- Search: `rg -l` then targeted read; never bare `rg pattern` on big trees
+- Files: `fd` (respects .gitignore) over `find`
+- Read: `Read` with `offset`/`limit` for >500-line files; never re-read after Edit
+- History: `git log --oneline -20`; `git diff --stat` before full diff
+- JSON: `jq -c` (compact); avoid pretty-printing into context
+- List: `eza -1` for names; `ls -la` only when permissions matter
 
-## Files to Ignore/Rarely Change
-- `/home/chase/.oh-my-zsh/` — not used, minimal zsh config preferred
-- System-level configs outside `~/.config/`
-- Large generated files (node_modules, .cache, etc.)
+# Token efficiency
 
-## Code Exploration Strategy
-1. **Start small** — `git log --oneline -n 20` to understand recent context
-2. **Map structure** — `fd . --type f` to see file layout before reading
-3. **Search precisely** — `rg 'pattern'` before `grep`, use context flags (`-B3 -A3`)
-4. **Read efficiently** — `bat <file>` with line numbers for code, `cat` for plain text
-5. **Verify with git** — `git show <hash>` or `git diff` to confirm changes
+- Compact early: `/compact` at ~60% context, before auto-trigger at 80%.
+- Parallel tool calls for independent ops — sequential only when B needs A's output.
+- Skip extended thinking for extraction, routing, and classification tasks.
+- Tool descriptions: 50 tokens max. No examples inside tool definitions.
+- No dynamic values (timestamps, UUIDs) in the system prompt prefix — cache miss every call.
 
-## Important Rules
-- Always use your tools directly to create/edit files — do not just describe what to do
-- Prefer `rg` over `grep`, `fd` over `find`, `bat` over `cat`
-- Keep responses short and direct — no trailing summaries unless asked
-- For config changes, test immediately (reload hyprland, restart terminal)
-- Before major changes, check git status and recent history
+# Don't read
+
+- `~/.oh-my-zsh/` (not used)   `node_modules/`, `.cache/`, build artifacts
+- System configs outside `~/.config/`   Memory files (loaded already)

@@ -1,113 +1,37 @@
 ---
 name: bash-patterns
-description: Efficient bash patterns to use for faster execution and lower token cost
-metadata: 
-  node_type: memory
+description: Token-cheap bash patterns. Reach for these before the verbose default.
+metadata:
   type: reference
-  originSessionId: 54a771e7-253d-4f42-a216-4f877a6d13b7
 ---
 
-## Fast Discovery Patterns
+## Default to the terse variant
 
-### Finding Files
-```bash
-# ✓ Use fd (fast, respects .gitignore)
-fd 'pattern' <path>
-fd -e ts -e tsx <path>  # by extension
+| Task | Cheap | Avoid |
+|------|-------|-------|
+| recent commits | `git log --oneline -20` | `git log` |
+| diff overview | `git diff --stat` | `git diff` (full) |
+| find pattern in code | `rg -l pattern \| head` then targeted read | `rg -B3 -A3 pattern` on big trees |
+| find files | `fd 'name' -t f` | `find . -name '*name*'` |
+| list dir | `eza -1` (names only) | `ls -la` (only when permissions matter) |
+| read large file | `Read` with `offset`/`limit` | full read of >500-line file |
+| view JSON | `jq -c '.field' f` | `jq '.' f` (pretty, ~30% bigger) |
+| installed pkgs | `pacman -Qq \| wc -l` then `pacman -Qs <name>` | `pacman -Q` (1500+ lines) |
+| process tree | `ps -eo pid,comm --sort=-pcpu \| head -20` | `ps aux` |
 
-# ✗ Slow: find is verbose and slower
-find <path> -type f -name 'pattern'
-```
+## Composition
 
-### Searching Code
-```bash
-# ✓ Use rg (ripgrep, fast, colored output)
-rg 'pattern' <path>
-rg -A3 -B3 'pattern'   # with context
-rg -l 'pattern'        # list files only
+- Pipe to `head -N` after `rg`/`fd` if you only need a sample.
+- Combine in one Bash call (`fd … \| while read f; do …; done`) rather than 3 calls.
+- Parallel: independent reads/greps go in one assistant turn, not sequential turns.
 
-# ✗ Slow: grep requires more flags and is slower
-grep -r 'pattern' <path>
-```
+## Edit > Write
 
-### Reading Files
-```bash
-# ✓ Use bat (syntax highlighting + line numbers)
-bat <file>
-bat --line-range 10:50 <file>
+- `Edit` sends the diff context only (~50 tokens). `Write` re-sends the whole file.
+- Use `Write` only for new files or full rewrites.
+- Never re-read a file after `Edit` — the harness tracks state.
 
-# ✓ Use cat for plain text (no highlighting needed)
-cat <file>
+## Subagent threshold
 
-# ✗ Avoid: head/tail for small explorations, just read the whole file
-```
-
-## Piping & Composition
-```bash
-# ✓ Chain commands efficiently
-fd 'config' | rg 'color' | bat
-
-# ✓ Use git for history (faster than searching logs)
-git log --oneline -n 20
-git log -p --grep='pattern'
-git show <hash>
-git diff <hash1> <hash2>
-
-# ✓ Parse JSON
-jq '.field.nested' <file>
-echo '{"a":1}' | jq '.a'
-```
-
-## One-Liners vs Multiple Calls
-
-### ✓ Combine when possible
-```bash
-# One call: faster, fewer token-expensive Bash invocations
-fd pattern -e ts -e tsx | while read f; do bat "$f"; done
-```
-
-### ✗ Avoid unnecessary loops
-```bash
-# Bad: Multiple Bash calls for what could be one command
-for f in $(find . -name "*.ts"); do cat "$f"; done
-```
-
-## Git Patterns
-```bash
-# ✓ Quick history overview (cheap, fast)
-git log --oneline -n 20
-
-# ✓ See a specific change
-git show <commit-hash>
-
-# ✓ See diff between commits
-git diff <hash1>..<hash2>
-
-# ✓ Blame for context
-git blame <file>
-
-# ✗ Avoid: Full log output without limiting
-git log  # outputs everything, slow to read
-```
-
-## Listing & Inspection
-```bash
-# ✓ Concise listing
-ls -la <dir>
-
-# ✓ Count files
-fd . --type f | wc -l
-
-# ✓ Detect file type
-file <file>
-
-# ✗ Avoid: complex find with many flags
-find . -type f -newer <file> -mtime -7 -name '*.ts'  # use fd instead
-```
-
-## Token Efficiency Strategy
-1. **Use fd/rg first** — narrow search space before reading files
-2. **Combine pipes** — one Bash call > three Bash calls
-3. **Use git history** — cheaper than searching through code
-4. **Read once, fully** — reading a whole file is cheaper than multiple head/tail calls
-5. **Trust syntax** — once you understand pattern, don't read more examples
+- If a question needs >5 read-only tool calls, spawn an `Explore` subagent.
+- Cost of spinning one up < cost of carrying raw search output in main context.
